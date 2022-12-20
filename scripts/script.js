@@ -12,7 +12,7 @@
 
 var latitud = 34.064541037456436;
 var longitud = -118.31563894120258;
-var zoom = 16;
+var zoom = 18;
 
 var map = L.map('map').setView([latitud, longitud], zoom);
 
@@ -42,25 +42,13 @@ L.tileLayer(MAPBOX_API, {
 
 var metroIcon = L.icon({
     iconUrl: "../Assets/tren-electrico.png",
-    //shadowUrl: 'leaf-shadow.png',
-    iconSize: [15, 15], // size of the icon
-    shadowSize: [50, 64], // size of the shadow
-    iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
-    shadowAnchor: [4, 62],  // the same for the shadow
-    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+    iconSize: [15, 15]
 });
-
 
 var busesIcon = L.icon({
     iconUrl: "../Assets/autobus-escolar.png",
-    //shadowUrl: 'leaf-shadow.png',
-    iconSize: [15, 15], // size of the icon
-    shadowSize: [50, 64], // size of the shadow
-    iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
-    shadowAnchor: [4, 62],  // the same for the shadow
-    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+    iconSize: [15, 15] 
 });
-
 
 async function getMetro() {
     const respuestaMetro = await fetch("https://api.metro.net/LACMTA_Rail/vehicle_positions/all?geojson=false")
@@ -109,71 +97,59 @@ async function getBus() {
 }
 
 
+//Version sin ASYNC AWAIT
+
+// let marcadores = []; // matriz para guardar los marcadores
+// setInterval(() => {Promise.all([getMetro(), getBus()]).then((value) => {
+//     // eliminar marcadores del mapa
+//     for (let i = 0; i < marcadores.length; i++) {
+//       map.removeLayer(marcadores[i]);
+//     }
+//     marcadores = []; // vaciar array
+//     // añadimos marcadores
+//     for (let i = 0; i < value.length; i++) {
+//       console.log(value);
+//       for (let j = 0; j < value[i].length; j++) {
+//         let marker;
+//         if (i === 0) {
+//           marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map);
+//           console.log(value[i][j].latitud, value[i][j].longitud);
+//         } else {
+//           marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map);
+//         }
+//         marker.bindPopup(`${value[i][j].id}`);
+//         marcadores.push(marker); //agregamos el marcador al array para luegoo poder borrarlo cuando vuelva a pasar
+//       }
+//     }
+//   });
+// }, 10000);
 
 
-let markers = []; // matriz para guardar los marcadores
-setInterval(() => {Promise.all([getMetro(), getBus()]).then((value) => {
-    // eliminar marcadores del mapa
-    for (let i = 0; i < markers.length; i++) {
-      map.removeLayer(markers[i]);
+
+
+// VERSION ASYNC AWAIT
+
+let marcadores = []; // matriz para guardar los marcadores
+
+async function actualizaMarcadores() {
+const valor = await Promise.all([getMetro(), getBus()]);
+    for (let i = 0; i < marcadores.length; i++) {
+      map.removeLayer(marcadores[i]);
     }
-    markers = []; // vaciar array
-    // añadimos marcadores
-    for (let i = 0; i < value.length; i++) {
-      console.log(value);
-      for (let j = 0; j < value[i].length; j++) {
+    marcadores = [];
+    for (let i = 0; i < valor.length; i++) {
+      for (let j = 0; j < valor[i].length; j++) {
         let marker;
         if (i === 0) {
-          marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map);
+          marker = L.marker([valor[i][j].latitud, valor[i][j].longitud], { icon: metroIcon }).addTo(map);
+          console.log(valor[i][j].latitud, valor[i][j].longitud);
         } else {
-          marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map);
+          marker = L.marker([valor[i][j].latitud, valor[i][j].longitud], { icon: busesIcon }).addTo(map);
         }
-        marker.bindPopup(`${value[i][j].id}`);
-        markers.push(marker); //agregamos el marcador al array para luegoo poder borrarlo cuando vuelva a pasar
+        marker.bindPopup(`${valor[i][j].id}`);
+        marcadores.push(marker);
       }
     }
-  });
-}, 10000);
+  }
 
-
-
-
-
-
-// OPCION A
-
-// setInterval(()=> Promise.all([getMetro(),getBus()]).then((value)=> {
-
-// for (let i = 0; i < value.length; i++) {
-//     console.log(value);
-//     // Deben borrarse los marcadores del mapa
-//     // markers.clearLayers()
-    
-//     for (let j = 0; j < value[i].length; j++) {
-
-//         if (i === 0) {
-//         let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map)
-//         marker.bindPopup(`${value[i][j].id}`)
-//         } else {
-//         let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map)
-//         marker.bindPopup(`${value[i][j].id}`)   
-//         }
-//     }   
-// }
-// }), 10000)
-
-
-//OPCION B
-
-// async function updateMap() {
-//     const [metro, bus] = await Promise.all([getMetro(), getBus()]);
-//     for (let i = 0; i < metro.length; i++) {
-//       const marker = L.marker([metro[i].latitud, metro[i].longitud], { icon: metroIcon }).addTo(map);
-//       marker.bindPopup(`${metro[i].id}`);
-//     }
-//     for (let i = 0; i < bus.length; i++) {
-//       const marker = L.marker([bus[i].latitud, bus[i].longitud], { icon: busesIcon }).addTo(map);
-//       marker.bindPopup(`${bus[i].id}`);
-//     }
-//   }
-//   setInterval(updateMap(), 30000);
+  setInterval(actualizaMarcadores, 4000);
