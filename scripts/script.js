@@ -12,7 +12,7 @@
 
 var latitud = 34.064541037456436;
 var longitud = -118.31563894120258;
-var zoom = 13;
+var zoom = 14;
 
 var map = L.map('map').setView([latitud, longitud], zoom);
 
@@ -111,32 +111,33 @@ async function getBus() {
 
 // OPCION A
 
-// setInterval(Promise.all([getMetro(),getBus()]).then((value)=> {
-// for (let i = 0; i < value.length; i++) {
-//     for (let j = 0; j < value[i].length; j++) {
+setInterval(()=> Promise.all([getMetro(),getBus()]).then((value)=> {
+for (let i = 0; i < value.length; i++) {
+    console.log(value);
+    for (let j = 0; j < value[i].length; j++) {
 
-//         if (i === 0) {
-//         var marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map)
-//         marker.bindPopup(`${value[i][j].id}`)
-//         } else {
-//         var marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map)
-//         marker.bindPopup(`${value[i][j].id}`)   
-//         }
-//     }   
-// }
-// }), 3000)
+        if (i === 0) {
+        let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map)
+        marker.bindPopup(`${value[i][j].id}`)
+        } else {
+        let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map)
+        marker.bindPopup(`${value[i][j].id}`)   
+        }
+    }   
+}
+}), 10000)
 
 //OPCION B
 
-async function updateMap() {
-    const [metro, bus] = await Promise.all([getMetro(), getBus()]);
-    for (let i = 0; i < metro.length; i++) {
-      const marker = L.marker([metro[i].latitud, metro[i].longitud], { icon: metroIcon }).addTo(map);
-      marker.bindPopup(`${metro[i].id}`);
-    }
-    for (let i = 0; i < bus.length; i++) {
-      const marker = L.marker([bus[i].latitud, bus[i].longitud], { icon: busesIcon }).addTo(map);
-      marker.bindPopup(`${bus[i].id}`);
-    }
-  }
-  setInterval(updateMap(), 30000);
+// async function updateMap() {
+//     const [metro, bus] = await Promise.all([getMetro(), getBus()]);
+//     for (let i = 0; i < metro.length; i++) {
+//       const marker = L.marker([metro[i].latitud, metro[i].longitud], { icon: metroIcon }).addTo(map);
+//       marker.bindPopup(`${metro[i].id}`);
+//     }
+//     for (let i = 0; i < bus.length; i++) {
+//       const marker = L.marker([bus[i].latitud, bus[i].longitud], { icon: busesIcon }).addTo(map);
+//       marker.bindPopup(`${bus[i].id}`);
+//     }
+//   }
+//   setInterval(updateMap(), 30000);
