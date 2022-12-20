@@ -12,7 +12,7 @@
 
 var latitud = 34.064541037456436;
 var longitud = -118.31563894120258;
-var zoom = 14;
+var zoom = 16;
 
 var map = L.map('map').setView([latitud, longitud], zoom);
 
@@ -109,23 +109,59 @@ async function getBus() {
 }
 
 
+
+
+let markers = []; // matriz para guardar los marcadores
+setInterval(() => {Promise.all([getMetro(), getBus()]).then((value) => {
+    // eliminar marcadores del mapa
+    for (let i = 0; i < markers.length; i++) {
+      map.removeLayer(markers[i]);
+    }
+    markers = []; // vaciar array
+    // añadimos marcadores
+    for (let i = 0; i < value.length; i++) {
+      console.log(value);
+      for (let j = 0; j < value[i].length; j++) {
+        let marker;
+        if (i === 0) {
+          marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map);
+        } else {
+          marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map);
+        }
+        marker.bindPopup(`${value[i][j].id}`);
+        markers.push(marker); //agregamos el marcador al array para luegoo poder borrarlo cuando vuelva a pasar
+      }
+    }
+  });
+}, 10000);
+
+
+
+
+
+
 // OPCION A
 
-setInterval(()=> Promise.all([getMetro(),getBus()]).then((value)=> {
-for (let i = 0; i < value.length; i++) {
-    console.log(value);
-    for (let j = 0; j < value[i].length; j++) {
+// setInterval(()=> Promise.all([getMetro(),getBus()]).then((value)=> {
 
-        if (i === 0) {
-        let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map)
-        marker.bindPopup(`${value[i][j].id}`)
-        } else {
-        let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map)
-        marker.bindPopup(`${value[i][j].id}`)   
-        }
-    }   
-}
-}), 10000)
+// for (let i = 0; i < value.length; i++) {
+//     console.log(value);
+//     // Deben borrarse los marcadores del mapa
+//     // markers.clearLayers()
+    
+//     for (let j = 0; j < value[i].length; j++) {
+
+//         if (i === 0) {
+//         let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: metroIcon }).addTo(map)
+//         marker.bindPopup(`${value[i][j].id}`)
+//         } else {
+//         let marker = L.marker([value[i][j].latitud, value[i][j].longitud], { icon: busesIcon }).addTo(map)
+//         marker.bindPopup(`${value[i][j].id}`)   
+//         }
+//     }   
+// }
+// }), 10000)
+
 
 //OPCION B
 
